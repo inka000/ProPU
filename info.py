@@ -31,6 +31,13 @@
 
 import re
 import sys
+from math import sqrt
+from math import exp
+import numpy as np
+
+DO = 8.0 #distance cut-off
+DELTA = 1.5
+
 
 '''
 class Atome : object with atoms informations
@@ -62,9 +69,7 @@ def readPDB(filename):
 	try :
 		f=open(filename,"r")
 	except OSError :
-		print("The file does not exist in the directory, please provide an existing file\n")
-	#if filename not in files :
-		#raise Exception("The file does not exist in the directory, please provide an existing file\n")
+		sys.exit("The file does not exist in the directory, please provide an existing file\n")
 	else :
 		atomes=[]
 		re_atomes=re.compile("^ATOM")
@@ -78,10 +83,37 @@ def readPDB(filename):
 		f.close()
 		return atomes
 
+def distance(atom1, atom2):
+    '''
+    Calculates and returns the distance between two Atome instances based on coordinates, using sqrt function from math module
+    '''
+    d=sqrt((atom1.xpos-atom2.xpos)**2+(atom1.ypos-atom2.ypos)**2+(atom1.zpos-atom2.zpos)**2)
+    return d
+
+def contacts_matrix(filename, DO, DELTA) :
+	'''
+	Creates the contact matrix of the residus within the protein
+	Returns an array of the size of the number of residues with probabilities
+	of contacts
+	'''
+	list_atoms = readPDB(filename) #the list of atoms from the pdb file
+	contacts = np.zeros((len(list_atoms), len(list_atoms))) #initializes a matrix
+	#of zeros the size of number of residues
+	for i in range(len(list_atoms)) :
+		for j in range(len(list_atoms)) : #the matrix is symetric
+			#i is the line, j the col
+			d = distance(list_atoms[i], list_atoms[j])
+			contacts[i,j] = 1/((1+exp((d - DO) / DELTA)))
+	return(contacts)
+
+
+
+
 
 def main() :
 	namefile = sys.argv[1]
-	atomes = readPDB(namefile)
+	print(contacts_matrix(namefile, DO, DELTA))
+
 
 
 
