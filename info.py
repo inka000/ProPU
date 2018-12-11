@@ -34,6 +34,7 @@ import sys
 from math import sqrt
 from math import exp
 import numpy as np
+import pylab
 
 DO = 8.0 #distance cut-off
 DELTA = 1.5
@@ -48,6 +49,7 @@ class Atome : object with atoms informations
 	residu number in the protein
 '''
 class Atome :
+	
 	def __init__(self,line):
 		self.atome_name=line[13:16].split(" ")[0]
 		self.chain=str(line[21])
@@ -57,31 +59,77 @@ class Atome :
 		self.residu_type=line[17:20]
 		self.residu_num=int(line[22:26])
 		self.atome_num=int(line[6:11])
+	
 	def __str__(self):
 		return "{} {} {} {} {} {} {} {}".format(self.atome_name, self.chain, self.xpos, self.ypos , self.zpos, self.residu_type, self.residu_num, self.atome_num)
+	
 
 '''
 readPDB(filename) fonction :
 Reads the provided file in the data directory, uses only the first model
 '''
-def readPDB(filename):
-	#files=os.listdir('../data/')
+
+def readChainPDB(filename):
+	'''
+	Gets the chains of the pdb
+	'''
 	try :
 		f=open(filename,"r")
 	except OSError :
 		sys.exit("The file does not exist in the directory, please provide an existing file\n")
 	else :
-		atomes=[]
-		re_atomes=re.compile("^ATOM")
-		re_fin_modele=re.compile("^ENDMDL")
-		for line in f:
-			if re_atomes.search(line):
-				if re.search("CA",line) :
-					atomes.append(Atome(line))
-			elif re_fin_modele.search(line):
-				break
+		list_chains = []
+		line = f.readline()
+		while not re.search("^COMPND", line) :
+			line = f.readline()
+		#The line contains COMPND information
+		while re.search("^COMPND", line) :
+			if re.search("CHAIN:", line) :
+				list_chains.append(line.split()[-1][0])
+			line = f.readline()
 		f.close()
-		return atomes
+		return(list_chains)
+
+
+def readPDB(filename, chain):
+	f=open(filename,"r")
+	atomes=[]
+	re_end_chain=re.compile("^TER")
+	#initialization of the first line
+	line = f.readline()
+	#The function searches lines with atoms
+	while not (re.search("^ATOM",line) or re.search("^HETATM", line)) :
+		line = f.readline()
+	#The line is an atom, now the function searches for the right chain
+	while str(line[21]) != chain :
+		line = f.readline()
+	#The line contains the right chain
+	while not re_end_chain.search(line) : #If this is true, the chain ends
+		if re.search("^ATOM",line) or re.search("^HETATM", line):
+			if re.search("CA",line) and int(line[22:26])>0 :
+				atomes.append(Atome(line))
+		line = f.readline()
+		
+	f.close()
+	return atomes
+
+def dssp(filename, chain):
+    '''
+    Creates a list of secondary structures assignment 
+    It reads a file out of DSSP and gets the 
+    secondary structures
+    '''
+    list_ss = [] #list of secondary structures
+    with open(filename, 'r') as dssp_file :
+        line = dssp_file.readline()
+        while not re.search('  #  RESIDUE', line) :
+            #Reads until it reads a line with secondary structure
+            line = dssp_file.readline()
+        for line in dssp_file :
+            if line[13]!= '!' and line[11] == chain: 
+                #Adds the secondary structure
+                list_ss.append((line[16]))
+    return(list_ss)
 
 def distance(atom1, atom2):
     '''
@@ -90,13 +138,14 @@ def distance(atom1, atom2):
     d=sqrt((atom1.xpos-atom2.xpos)**2+(atom1.ypos-atom2.ypos)**2+(atom1.zpos-atom2.zpos)**2)
     return d
 
-def contacts_matrix(filename, DO, DELTA) :
+def contacts_matrix(filename, DO, DELTA, name, chain) :
 	'''
 	Creates the contact matrix of the residus within the protein
 	Returns an array of the size of the number of residues with probabilities
 	of contacts
 	'''
-	list_atoms = readPDB(filename) #the list of atoms from the pdb file
+	list_atoms = readPDB(filename, chain) #the list of atoms from the pdb file
+	list_ss = dssp("DSSP/"+name+".out", chain)
 	contacts = np.zeros((len(list_atoms), len(list_atoms))) #initializes a matrix
 	#of zeros the size of number of residues
 	for i in range(len(list_atoms)) :
@@ -112,8 +161,20 @@ def contacts_matrix(filename, DO, DELTA) :
 
 def main() :
 	namefile = sys.argv[1]
-	print(contacts_matrix(namefile, DO, DELTA))
 
+	list_chains = readChainPDB(namefile)
+	chain = input("Choose a chain, in your pdb file the chains are {} :"
+		.format(','.join(list_chains)))
+	while chain not in list_chains :
+		print("It is not a chain from your pdb file")
+		chain = input("Choose a chain, in your pdb file the chains are {} :"
+		.format(','.join(list_chains)))
+	name = (namefile.split("/")[-1]).split(".")[0]
+	contacts = (contacts_matrix(namefile, DO, DELTA, name, chain))
+
+	pylab.matshow((contacts))
+	pylab.colorbar()
+	pylab.show()
 
 
 
