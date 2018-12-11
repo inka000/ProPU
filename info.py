@@ -222,7 +222,7 @@ def main() :
 	min_size = 9
 	max_size = 39
 	dico_PI = {}
-	for begin in range(0,(len(list_ss)-39)) :
+	for begin in range(0,(len(list_ss)-max_size)) :
 		dico_PI[begin+1] = calculate_PI(contacts, begin, min_size, max_size, list_ss)
 	print(dico_PI)
 	#pylab.matshow((contacts))
