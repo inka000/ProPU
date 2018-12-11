@@ -36,8 +36,8 @@ from math import exp
 import numpy as np
 import pylab
 
-DO = 8.0 #distance cut-off
-DELTA = 1.5
+DO = 8.0 #distance cut-off, there is not any interaction below 8A
+DELTA = 1.5 #parameter of the logistic probability function
 
 
 '''
@@ -138,22 +138,69 @@ def distance(atom1, atom2):
     d=sqrt((atom1.xpos-atom2.xpos)**2+(atom1.ypos-atom2.ypos)**2+(atom1.zpos-atom2.zpos)**2)
     return d
 
-def contacts_matrix(filename, DO, DELTA, name, chain) :
+def contacts_matrix(filename, DO, DELTA, chain) :
 	'''
 	Creates the contact matrix of the residus within the protein
 	Returns an array of the size of the number of residues with probabilities
 	of contacts
 	'''
 	list_atoms = readPDB(filename, chain) #the list of atoms from the pdb file
-	list_ss = dssp("DSSP/"+name+".out", chain)
 	contacts = np.zeros((len(list_atoms), len(list_atoms))) #initializes a matrix
 	#of zeros the size of number of residues
 	for i in range(len(list_atoms)) :
-		for j in range(len(list_atoms)) : #the matrix is symetric
+		for j in range(i,len(list_atoms)) : #the matrix is symetric
 			#i is the line, j the col
 			d = distance(list_atoms[i], list_atoms[j])
 			contacts[i,j] = 1/((1+exp((d - DO) / DELTA)))
 	return(contacts)
+
+def single_PI(contacts, a, b, list_ss) :
+	'''
+	Calculates the PI cutting the contacts matrix between a and b
+	If a or b cuts inside a secondary structure, it returns 0
+	'''
+	ss_a = list_ss[a]
+	ss_b = list_ss[b]
+	#If those are coils, it puts NA instead to facilitate the rest of the function
+	if ss_a == " ":
+		ss_a = "NA"
+	if ss_b == " ":
+		ss_b = "NA"
+	if a == 0 and b != (len(list_ss)-1) and list_ss[b+1] == ss_b  :
+		#The PU begins at the begining of the protein
+		#The PU does not end at the end of the protein
+		#Cutting at b cuts within a secondary structure
+		return(0)
+	elif a !=0 and b == (len(list_ss)-1) and list_ss[a-1] == ss_a :
+		#The PU does not begin at the begining of the protein
+		#The PU ends at the end of the protein
+		#Cutting at a is within a secondary strucutre
+		return(0)
+	elif list_ss[b+1] == ss_b or list_ss[a-1] == ss_a :
+		#The PU is inside the protein
+		#Cutting at a or b cuts within a secondary structure
+		return(0)
+	else :
+		A = 0;	B = 0;	C = 0
+		for i in range(len(list_ss)) :
+			for j in range(i, len(list_ss)) :
+				if (i >= a and i <= b) and (j >= a and j<= b) : #the contact is in A
+					A += contacts[i,j]
+				elif (i < a or i > b) and (j < a or j > b) : #the contact is in B
+					B += contacts[i,j]
+				else : #the contact is between A and B
+					C += contacts[i,j]
+		PI = (A * B - C**2)/((A + C) * (B + C))
+		return(PI)
+
+def calculate_PI(contacts, begin, min_size, max_size, list_ss) :
+	'''
+	Calculates PIs for a beginning of PU
+	'''
+	list_PI = []
+	for end in range((begin+min_size), (begin+max_size)) :
+		list_PI.append(single_PI(contacts, begin, end, list_ss))
+	return(list_PI)
 
 
 
@@ -170,11 +217,17 @@ def main() :
 		chain = input("Choose a chain, in your pdb file the chains are {} :"
 		.format(','.join(list_chains)))
 	name = (namefile.split("/")[-1]).split(".")[0]
-	contacts = (contacts_matrix(namefile, DO, DELTA, name, chain))
-
-	pylab.matshow((contacts))
-	pylab.colorbar()
-	pylab.show()
+	contacts = (contacts_matrix(namefile, DO, DELTA, chain))
+	list_ss = dssp("DSSP/"+name+".out", chain)
+	min_size = 9
+	max_size = 39
+	dico_PI = {}
+	for begin in range(0,(len(list_ss)-39)) :
+		dico_PI[begin+1] = calculate_PI(contacts, begin, min_size, max_size, list_ss)
+	print(dico_PI)
+	#pylab.matshow((contacts))
+	#pylab.colorbar()
+	#pylab.show()
 
 
 
