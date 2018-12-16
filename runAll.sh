@@ -15,6 +15,6 @@ for f in Query/* ; do
 	pdb=`echo $f | cut -d/ -f2`
 	name=`echo ${f##*/} | cut -d. -f1`
 	./dssp-2.0.4-linux-amd64 -i ./$f -o DSSP/$name.out &>> suivi/tmp.log
-	python3 ./parse_dssp.py DSSP/$name.out
+	#python3 ./parse_dssp.py DSSP/$name.out
 done
 
