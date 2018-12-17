@@ -35,6 +35,7 @@ from math import sqrt
 from math import exp
 import numpy as np
 from progress.bar import FillingSquaresBar
+import matplotlib.pyplot as plt
 #import pylab
 
 DO = 8.0 #distance cut-off, there is not any interaction below 8A
@@ -285,6 +286,7 @@ def main() :
         bar.next()
     bar.finish()
     create_file(dico_PI, name+".txt", min_size)
+    #print(graph(dico_PI, 1))
     #pylab.matshow((contacts))
     #pylab.colorbar()
     #pylab.show()
