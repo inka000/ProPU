@@ -34,7 +34,7 @@ import sys
 from math import sqrt
 from math import exp
 import numpy as np
-from progress.bar import Bar
+from progress.bar import FillingSquaresBar
 #import pylab
 
 DO = 8.0 #distance cut-off, there is not any interaction below 8A
@@ -155,11 +155,41 @@ def contacts_matrix(filename, DO, DELTA, chain) :
             contacts[i,j] = 1/((1+exp((d - DO) / DELTA)))
     return(contacts)
 
+def single_Sigma(contacts, a, b, flag) :
+    '''
+    Calculates the separation criterion for the PU between a and b.
+    A low sigma means that the PU does less contacts with the rest of the protein
+    '''
+    alpha = 0.43 #from the article
+    Pinter = 0 #interactions of A vs the rest of the protein
+    Ptot = 0 #total of interactions
+    PUsize = b - a + 1
+    if flag == 0 : #The PI was not calculated
+        return (0) 
+    for i in range(contacts.shape[0]) :
+            for j in range(i, contacts.shape[1]) :
+                if (i >= a and i <= b) and (j >= a and j<= b) : #the contact is in A
+                    Ptot += contacts[i,j]
+                elif (i < a or i > b) and (j < a or j > b) : #the contact is in B
+                    Ptot += contacts[i,j]
+                else : #the contact is between A and B
+                    Ptot += contacts[i,j]
+                    Pinter += contacts[i,j]
+    haut = Pinter /( (PUsize ** alpha) * (contacts.shape[0] - PUsize)**alpha )
+    bas = Ptot / contacts.shape[0]
+
+    sigma = haut / bas
+    return(sigma)
+
+
 def single_PI(contacts, a, b, list_ss) :
     '''
     Calculates the PI cutting the contacts matrix between a and b
     If a or b cuts inside a secondary structure, it returns 0
+    Returns also the sigma (separation criterion) and the k 
+    (compactness criterion)
     '''
+    flag = 0
     ss_a = list_ss[a]
     ss_b = list_ss[b]
     #If those are coils, it puts NA instead to facilitate the rest of the function
@@ -171,17 +201,18 @@ def single_PI(contacts, a, b, list_ss) :
         #The PU begins at the begining of the protein
         #The PU does not end at the end of the protein
         #Cutting at b cuts within a secondary structure
-        return(0)
+        return(0,0,0)
     elif a !=0 and b == (len(list_ss)-1) and list_ss[a-1] == ss_a :
         #The PU does not begin at the begining of the protein
         #The PU ends at the end of the protein
         #Cutting at a is within a secondary strucutre
-        return(0)
+        return(0,0,0)
     elif list_ss[b+1] == ss_b or list_ss[a-1] == ss_a :
         #The PU is inside the protein
         #Cutting at a or b cuts within a secondary structure
-        return(0)
+        return(0,0,0)
     else :
+        flag = 1 #a PI is calculated
         A = 0;  B = 0;  C = 0
         for i in range(len(list_ss)) :
             for j in range(i, len(list_ss)) :
@@ -192,7 +223,13 @@ def single_PI(contacts, a, b, list_ss) :
                 else : #the contact is between A and B
                     C += contacts[i,j]
         PI = (A * B - C**2)/((A + C) * (B + C))
-        return(PI)
+        sigma = single_Sigma(contacts, a, b, flag)
+        k = A / (b - a + 1)
+        return(PI, sigma, k)
+
+
+
+
 
 def calculate_PI(contacts, begin, min_size, max_size, list_ss) :
     '''
@@ -204,7 +241,26 @@ def calculate_PI(contacts, begin, min_size, max_size, list_ss) :
     return(list_PI)
 
 
-
+def create_file(dico_PI, name, min_size) :
+    '''
+    Creates the file containing the calculated values :
+    - PI
+    - sigma
+    - k
+    '''
+    file = open("./resultPI/"+name, "w")
+    file.write("begin\tsize\tPI\tsigma\tk\n")
+    for key in dico_PI :
+        size = min_size + 1 #this is the size of the first PU for a given beginning 
+        for info in dico_PI[key] :
+            if info != (0,0,0) : #the tuple that contains only 0 will not be written
+                file.write("{}\t".format(key))
+                file.write("{}\t".format(size))
+                size += 1 #the size of the PU increases by 1
+                for i in range(len(info)) :
+                    file.write("{}\t".format(info[i]))
+                file.write("\n")
+    file.close()
 
 
 def main() :
@@ -223,17 +279,15 @@ def main() :
     min_size = 9
     max_size = 39
     dico_PI = {}
-
-    bar = Bar('Processing', max=(len(list_ss)-max_size))
+    bar = FillingSquaresBar('Processing', max=(len(list_ss)-max_size))
     for begin in range(0,(len(list_ss)-max_size)) :
         dico_PI[begin+1] = calculate_PI(contacts, begin, min_size, max_size, list_ss)
         bar.next()
     bar.finish()
-    print(dico_PI)
+    create_file(dico_PI, name+".txt", min_size)
     #pylab.matshow((contacts))
     #pylab.colorbar()
     #pylab.show()
-
 
 if __name__=='__main__':
     main()
