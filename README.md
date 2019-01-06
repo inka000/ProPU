@@ -60,7 +60,7 @@ PUs are cut according to minimum and maximum sizes defined in options. Then, bas
 PI values prevail on the selection of significant PUs as it assesses spliting quality quantifying the PUs independence based on contacts probabilities. Sigma and k values provide complementary information but a PU without a significant PI will not be kept, even if sigma or k were significant. 
 To choose best PUs among significant ones, ProPU searches for PUs with all three significant criteria first, then with two, and then with only PI values. Best PUs do not overlap on each other. However, ProPU suggests other PUs that could be interesting to study as it is hard to well defined protein units. 
 
-At the end, two .txt files are created :
+At the end, two .txt files are created in the directory resultPU/ :
 * chain_name2.txt : which contains all significant PUs
 * chain_name.txt : which contains best significant PUs that do not overlap on each other
   
