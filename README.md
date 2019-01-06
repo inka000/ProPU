@@ -21,7 +21,7 @@ ProPU is a software that analyses a protein structure and suggests different sub
 To install python3 packages it is recommended to install pip with the command :  
   `sudo apt install python3-pip`  
 and then to use pip to install packages with the command :  
-  `pip install /<package\>`
+  `pip install /<package/>`
 
 Once ProPU is downloaded, follow this command to make the program executable :  
   `cd ProPU`  
