@@ -40,7 +40,7 @@ Options are available :
 --delta                      Parameter of the logistic probability function (1.5 by default)
 --dist                       Distance cut-off for interactions (8.0 by default)
 
-An example is provided in the directory example/
+An example is provided in the directory example/  
 Run this example with the command line : `./ProPU -i example/`
 
 ## Description of the program
