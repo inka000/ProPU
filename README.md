@@ -52,9 +52,9 @@ This program analyses a pdb file given in entry and extract alpha carbon atoms o
   
 Based on those values, it defines best PUs along the protein. 
 The best PU has :
-    * a PI value near 1
-    * a sigma value near 0
-    * the highest k value possible 
+ * a PI value near 1
+ * a sigma value near 0
+ * the highest k value possible 
 
 PUs are cut according to minimum and maximum sizes defined in options. Then, based on a normalization (z-scores) of criteria values and p-value calculation, criteria are defined as significant or not with a threshold of 0.05. It is whether z-scores are negative of positive that defined if a PU can be considered as good. PUs with significantly too high sigma or too low PI and k are left.
 PI values prevail on the selection of significant PUs as it assesses spliting quality quantifying the PUs independence based on contacts probabilities. Sigma and k values provide complementary information but a PU without a significant PI will not be kept, even if sigma or k were significant. 
