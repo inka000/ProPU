@@ -42,8 +42,8 @@ run_program() {
     echo "max size = $maxsize"
     echo "delta = $delta"
     echo "distance cut-off = $dist"
-    echo "all PUs = $all"
-
+    echo 
+    
     #####PDB queries will be relocalized in Query repository#####
 
     for query in "$queryFiles"* ; do
