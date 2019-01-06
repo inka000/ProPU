@@ -65,7 +65,7 @@ At the end, two .txt files are created in the directory resultPU/ :
   
 Also, as many .png files are created as there are best PUs found by ProPU. Those files show boundaries of PUs on the contacts matrix of the protein. 
 
-This program uses formulas and derived formulas from: 
+This program uses formulas and derived formulas from:  
 Gelly, J. C., C. Etchebest, S. Hazout, and A. G. de Brevern. 2006. “Protein Peeling 2: A Web Server to Convert Protein Structures into Series of Protein Units.” Nucleic Acids Research 34 (WEB. SERV. ISS.).  
 and  
 Najmanovich, R.J., Torrance, J.W., and Thornton, J.M. (2005). Prediction of protein function from structure: Insights from methods for the detection of local structural similarities. BioTechniques 38, 847–851.
