@@ -4,7 +4,7 @@ Inka Leroy
 January 2019
 ## Presentation
 
-ProPU is a software that analyses a protein structure and suggests different subunits within the protein. Those subunits names protein units (PU) are independent from the rest of the protein and compact.
+ProPU is a software that analyses a protein structure and suggests different subunits within the protein. Those subunits, named protein units (PU), are independent from the rest of the protein and compact.
 
 ## Perequisites :  
 
