@@ -1,31 +1,67 @@
-"# protein_peeling" 
-#Notre but est de découper une protéine en PU et de trouver les meilleures zones de découpage.
-#D'abord on va créer une matrice de contacts avec la fonction logistique : p(i,j)=1/((1+exp[d(i,j)−d0)/Δ])
-#d(i,j) est la distance euclidienne entre deux carbones alpha
-#d0 est la distance cut-off pour laquelle on considère qu'il n'y a plus de contact
-#d0 est fixé à 8, Δ à 1.5
+### ProPU
 
-#Un PU c'est quand on a plus de contacts au sein de la PU que avec l'exterieur.
+Inka Leroy
+January 2019
+# Presentation
 
-#Au début la protéine est entière : 1 grand PU compris entre i=1 et j=N
-#Puis on découpe deux sous unités à 20 aa.
-#On calcule le PI (PIi,j(m)=(AB−C^2)/((A+C)(B+C)))
-#A est le nombre de contacts dans la sous unité A, B dans la sous unité B, et C entre A et B.
-#m est la position entre i et j, celle qui va bouger. A la première itération est est de 20.
+ProPU is a software that analyses a protein structure and suggests different subunits within the protein. Those subunits names protein units (PU) are independent from the rest of the protein and compact.
 
-#Puis on passe à m=21, puis m=22, etc jusqu'à 60
-#Puis on décale i de 1 et on recommence.
+# Perequisites :  
 
-#Pour chaque i de départ, on aura un plot de PI en fonction de m. On définira un seuil.
-#On pourra définir le meilleur PI.
+* [Python3](https://www.python.org/downloads/) with packages :
+  * sys
+  * re
+  * math
+  * numpy : `conda install numpy` ou bien `sudo apt-get install python3-numpy`
+  * matplotlib : 
+  * statistics
+  * scipy
+  * progress
+  
+To install python3 packages it is recommended to install pip with the command : 
+  `sudo apt install python3-pip`  
+and then to use pip to install packages with the command :
+  `pip install \<package\>`
 
-#On va aussi utiliser un deuxième critère : de compacité ou ce séparation
+Once ProPU is downloaded, follow this command to make the program executable :
+  `cd ProPU`
+  `chmod +x bin/dssp-2.0.4-linux-amd64`
+  `chmod +x ProPU`
+  
+Now you can run ProPU :
+  `./ProPU -i directory_where_pdb_files_are/`
 
-#On lit un pdb, on récupère les coordonnées, on fait la matrice de contacts
-#Avec les distances
-#On decoupe en deux sous-unités, on teste et on calcule PI, compacité et séparation.
-#On récupère les infos avec
-#pos_i pos_j PI(m) compact(PUa, PUb) separation(PUa, PUb)
+Options are available :
 
+-h, --help                   Displays help
+-i, --input                  Directory where pdb files are or path to a pdb file
+--min                        Minimum size for a PU (10 by default)
+--max                        Maximum size for a PU (40 by default)
+--delta                      Parameter of the logistic probability function (1.5 by default)
+--dist                       Distance cut-off for interactions (8.0 by default)
 
-#On voudra le plus grand PI, le plus grand separation et le plus petit compact.
+An example is provided in the directory example/
+Run this example with the command line : `./ProPU -i example/`
+
+# Description of the program
+
+This program analyses a pdb file given in entry and extract alpha carbon atoms on the precised chain. It creates a contacts matrix based on distances between atoms with, for each pair of atoms, a probability of contact based on a ligistic probability equation. Then, it cuts the protein into protein units (PUs) and calculates three criteria:
+  * partition index (PI)
+  * separation criterion (sigma)
+  * compactness criterion (k)
+  
+Based on those values, it defines best PUs along the protein. 
+The best PU has :
+    * a PI value near 1
+    * a sigma value near 0
+    * the highest k value possible 
+
+PUs are cut according to minimum and maximum sizes defined in options. Then, based on a normalization (z-scores) of criteria values and p-value calculation, criteria are defined as significant or not with a threshold of 0.05. It is whether z-scores are negative of positive that defined if a PU can be considered as good. PUs with significantly too high sigma or too low PI and k are left. 
+
+At the end, two .txt files are created :
+* <chain>_<name>2.txt : which contains all significant PUs
+* <chain>_<name>.txt : which contains best significant PUs that do not overlap on each other
+  
+Also, as many .png files are created as there are best PUs found by ProPU. Those files show boundaries of PUs on the contacts matrix of the protein. 
+
+#Thanks for using ProPU !
