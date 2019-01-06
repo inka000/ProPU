@@ -21,7 +21,7 @@ ProPU is a software that analyses a protein structure and suggests different sub
 To install python3 packages it is recommended to install pip with the command :  
   `sudo apt install python3-pip`  
 and then to use pip to install packages with the command :  
-  `pip install /<package/>`
+  `pip install package`
 
 Once ProPU is downloaded, follow this command to make the program executable :  
   `cd ProPU`  
@@ -61,8 +61,8 @@ PI values prevail on the selection of significant PUs as it assesses spliting qu
 To choose best PUs among significant ones, ProPU searches for PUs with all three significant criteria first, then with two, and then with only PI values. Best PUs do not overlap on each other. However, ProPU suggests other PUs that could be interesting to study as it is hard to well defined protein units. 
 
 At the end, two .txt files are created :
-* <chain>_<name>2.txt : which contains all significant PUs
-* <chain>_<name>.txt : which contains best significant PUs that do not overlap on each other
+* chain_name2.txt : which contains all significant PUs
+* chain_name.txt : which contains best significant PUs that do not overlap on each other
   
 Also, as many .png files are created as there are best PUs found by ProPU. Those files show boundaries of PUs on the contacts matrix of the protein. 
 
