@@ -1,4 +1,0 @@
-La formule de proba de contacts à pour distance cut-off 8.0A
-Ce qui correspond à une proba de 0.5.
-Donc on prendra pour seuil 0.5 pour la proba de contacts
-Toute paire de résidus avec une proba inf à 0.5 fera un contact.
