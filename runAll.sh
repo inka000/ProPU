@@ -1,14 +1,24 @@
 #!/bin/bash
 display_help() {
+    echo "ProPU is a program that find Protein Units within a chain of a protein."
+    echo "The Protein Units (PUs) are defined as compact and independent domains"
+    echo "in the protein. To find them, ProPU calculates several criteria : "
+    echo "Partition index (PI), separation criterion (sigma) and compactness "
+    echo "criterion (kappa). The program provides :"
+    echo "  - a <chain>_<name>2.txt file containing all PUs calculated with their information"
+    echo "  - a <chain>_<name>.txt file containing the best PUs "
+    echo "  - .png of contacts matrix with delimitations of PUs"
+    echo
     echo "Usage: $0 [option...]" >&2
     echo
     echo "   -h, --help                   Displays help"
     echo
-    echo "   -i, --input                  Directory where pdb files are "
+    echo "   -i, --input                  Directory where pdb files are"
+    echo "                                or path to a pdb file"
     echo
-    echo "   --min                        Minimal size for a PU (10 by default)"
+    echo "   --min                        Minimum size for a PU (10 by default)"
     echo
-    echo "   --max                        Maximal size for a PU (40 by default)"
+    echo "   --max                        Maximum size for a PU (40 by default)"
     echo
     echo "   --delta                      Parameter of the logistic probability function"
     echo "                                (1.5 by default)"
@@ -16,8 +26,8 @@ display_help() {
     echo "   --dist                       Distance cut-off for interactions"
     echo "                                (8.0 by default)"
     echo
-    echo "   --all                        Whether it considers all PUs or only the best one"
-    echo "                                [yes/no] (yes by default)"
+    echo "   --all                        Whether it considers all PUs or only the best ones"
+    echo "                                [yes/no] (no by default)"
     echo
     exit 1
 }
@@ -30,6 +40,13 @@ run_program() {
         mkdir resultPI
     fi
 
+    #paramters
+    echo "min size = $minsize" 
+    echo "max size = $maxsize"
+    echo "delta = $delta"
+    echo "distance cut-off = $dist"
+    echo "all PUs = $all"
+
     #####PDB queries will be relocalized in Query repository#####
 
     for query in "$queryFiles"* ; do
@@ -37,7 +54,7 @@ run_program() {
     done
 
     ######Secondary structure assignation with DSSP#####
-    ######And criterions calculations ##################
+    ######And criteria calculations ##################
     for f in Query/* ; do
         pdb=`echo $f | cut -d/ -f2`
         name=`echo ${f##*/} | cut -d. -f1`
@@ -149,11 +166,11 @@ if [ -z ${dist+x} ] || ! [ $(echo $dist | grep -v [a-Z]) ]; then
     dist=8.0 
 fi
 
-if [ -z ${all+x} ] ||  [ $(echo $dist | grep -v [a-Z]) ]; then 
-    all="yes"
+if [ -z ${all+x} ] ||  [ $(echo $all | grep -v [a-Z]) ]; then 
+    all="no"
 fi
 
-echo "$minsize $maxsize $delta $dist"
+
 
 #Check parameters values
 if [ -z ${queryFiles+x} ]; then 
@@ -169,6 +186,6 @@ elif [ $(bc <<< "$dist <= 0.0") -eq 1  ]; then
     echo "please provide a correct distance"
 
 else 
-    run_program 
+    run_program ;
 fi
 

@@ -156,7 +156,7 @@ class PU :
             #The PU ends at the end of the protein
             #Cutting at a is within a secondary strucutre
             return(0,0,0)
-        elif list_ss[b+1] == ss_b or list_ss[a-1] == ss_a :
+        elif (b != (len(list_ss)-1) and a != 0) and (list_ss[b+1] == ss_b or list_ss[a-1] == ss_a) :
             #The PU is inside the protein
             #Cutting at a or b cuts within a secondary structure
             return(0,0,0)
@@ -286,12 +286,12 @@ def contacts_matrix(filename, DO, DELTA, chain, list_atoms) :
 
 
 
-def calculate_criterions(contacts, begin, min_size, max_size, list_ss) :
+def calculate_criteria(contacts, begin, min_size, max_size, list_ss) :
     '''
     Calculates PIs for a beginning of PU
     '''
     list_PU = []
-    for end in range((begin+min_size), (begin+max_size)) :
+    for end in range((begin+min_size), (begin+max_size+1)) :
         size = end - begin + 1
         pu = PU(begin+1, end+1, size)
         pu.single_criterion(contacts, begin, end, list_ss)
@@ -386,9 +386,9 @@ def single_best_PU(list_to_analyse) :
     '''
     Analyses a list of PU and returns the best one
     The best PU is the one with :
-    - all significant and best criterions
+    - all significant and best criteria
     or
-    - two significant and best criterions
+    - two significant and best criteria
     or
     - best PI
     '''
@@ -407,11 +407,11 @@ def single_best_PU(list_to_analyse) :
             list_none.append([pu, index])
     
     if len(list_PSK) == 1 :
-        #There is just one PU with all criterions
+        #There is just one PU with all criteria
         return (list_PSK[0][0], list_PSK[0][1])
 
     elif len(list_PSK) > 0:
-        #There are several PUs with all criterions
+        #There are several PUs with all criteria
         #The best PI is kept
         max_PI = list_PSK[0]
         for element in list_PSK :
@@ -420,10 +420,10 @@ def single_best_PU(list_to_analyse) :
         return(max_PI[0], max_PI[1])
 
     elif len(list_bi) == 1 :
-        #there is only one PU with two criterions
+        #there is only one PU with two criteria
         return(list_bi[0][0], list_bi[0][1])
     elif len(list_bi) > 0:
-        #there are several PUs with two criterions
+        #there are several PUs with two criteria
         #the best PI is kept
         max_PI = list_bi[0]
         for element in list_bi :
@@ -456,7 +456,7 @@ def single_best_PU(list_to_analyse) :
 
 def best_PU(PUs) :
     '''
-    Finds best PUs based on criterions
+    Finds best PUs based on criteria
     The functions calls single_best_PU to find the best PU
     of a list of PUs to analyse.
     To create a list of PUs to analyse :
@@ -507,8 +507,8 @@ def main() :
     #parameters
     DO = float(sys.argv[2]) #distance cut-off, there is not any interaction below 8A
     DELTA = float(sys.argv[3]) #parameter of the logistic probability function
-    MIN_SIZE = int(sys.argv[4]) #minimal size of a PU
-    MAX_SIZE = int(sys.argv[5]) #maximal size of a PU
+    MIN_SIZE = int(sys.argv[4]) #minimum size of a PU
+    MAX_SIZE = int(sys.argv[5]) #maximum size of a PU
     option = str(sys.argv[6])#whether it considers all PUs or only significant ones
 
     #First, the programm reads the available chains from the pdb and ask the user
@@ -528,40 +528,45 @@ def main() :
     #It assigns secondary structures
     list_ss = dssp("DSSP/"+name+".out", chain)
 
-    #And calculates PI, sigma and k criterions
+    #And calculates PI, sigma and k criteria
     list_PU = []
    
-    bar = FillingSquaresBar('Processing', max=(len(list_ss)-MAX_SIZE))
-    for begin in range(0,(len(list_ss)-MAX_SIZE)) :
-        list_PU = list_PU + calculate_criterions(contacts, begin, MIN_SIZE, MAX_SIZE, list_ss)
-        bar.next()
+    M = MAX_SIZE
+    bar = FillingSquaresBar('Processing', max=(len(list_ss)-MIN_SIZE))
+    #for begin in range(0,(len(list_ss)-MAX_SIZE)) :
+    for begin in range(0, len(list_ss) ):
+        if begin < (len(list_ss) - MAX_SIZE) :
+            list_PU = list_PU + calculate_criteria(contacts, begin, MIN_SIZE, MAX_SIZE, list_ss)
+            bar.next()
+        elif M >= MIN_SIZE :
+            #To handle the end of the protein
+            M = M - 1
+            list_PU = list_PU + calculate_criteria(contacts, begin, MIN_SIZE, M, list_ss)
+            bar.next()
     bar.finish()
 
-    #Finds the best PU based on criterions values
+    #Finds the best PUs based on criteria values and option
     found_PU = find_PU(list_PU, option)
 
     create_file(found_PU, name, chain+"_"+name+"2.txt", MIN_SIZE, "w", chain)
 
-    #best_PU(found_PU, MAX_SIZE)
+    #Find the final best PUs
     list_best_PU = best_PU(found_PU)
 
     create_file(list_best_PU, name, chain+"_"+name+".txt", MIN_SIZE, "w", chain)
-    #for pu in list_PU :
-    #    print(pu.__str__())
-    #create_file(dico_PI, name+".txt", MIN_SIZE, "w")
 
+    #Creates png of matrix with delineated PUs
     for pu in list_best_PU :
-        pu.__str__()
-        #plt.imshow(contacts)
-        #plt.colorbar()
-        #plt.axvline(pu.begin)
-        #plt.axvline(pu.end)
-        #plt.axhline(pu.begin)
-        #plt.axhline(pu.end)
-        #plt.text(pu.begin+2, pu.end-2, "A", fontsize = 20, color = "red")
+        plt.imshow(contacts)
+        plt.colorbar()
+        plt.axvline(pu.begin)
+        plt.axvline(pu.end)
+        plt.axhline(pu.begin)
+        plt.axhline(pu.end)
+        plt.text(pu.begin+2, pu.end-2, "A", fontsize = 20, color = "red")
     
-        #plt.savefig("resultPI/"+name+"/"+chain+"_"+name+"_"+str(pu.begin)+".png")
-        #plt.show()
+        plt.savefig("resultPI/"+name+"/"+chain+"_"+name+"_"+str(pu.begin)+".png")
+        plt.show()
 
     
 
