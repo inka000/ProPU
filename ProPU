@@ -63,13 +63,6 @@ run_program() {
         python3 src/PUanalyses.py $f $dist $delta $minsize $maxsize
     done
 
-    ######Analyses of PUs#######
-    for f in resultPU/* ; do
-        texte=`echo $f | cut -d/ -f2`
-        name=`echo ${f##*/} | cut -d. -f1`
-        echo 'Analyses of '$name
-    done
-
     #####Cleaning#######
     rm -Rf Query DSSP
 }
