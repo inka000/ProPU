@@ -1,0 +1,4 @@
+Results for the chain A of the protein 2aak
+begin	end	size	PI	sigma	k	significant
+1   	20  	20  	0.54 	0.298	4.522	PS 
+124 	150 	27  	0.523	0.375	4.934	P  
