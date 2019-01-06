@@ -24,12 +24,11 @@ and then to use pip to install packages with the command :
   `pip install package`
 
 Once ProPU is downloaded, follow this command to make the program executable :  
-  `cd ProPU`  
   `chmod +x bin/dssp-2.0.4-linux-amd64`  
   `chmod +x ProPU`  
   
 Now you can run ProPU :  
-  `./ProPU -i directory_where_pdb_files_are/`
+  `./ProPU -i [PDB_FILES_PATH]`
 
 Options are available :
 
