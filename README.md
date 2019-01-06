@@ -1,12 +1,12 @@
-### ProPU
+# ProPU
 
 Inka Leroy
 January 2019
-# Presentation
+## Presentation
 
 ProPU is a software that analyses a protein structure and suggests different subunits within the protein. Those subunits names protein units (PU) are independent from the rest of the protein and compact.
 
-# Perequisites :  
+## Perequisites :  
 
 * [Python3](https://www.python.org/downloads/) with packages :
   * sys
@@ -43,7 +43,7 @@ Options are available :
 An example is provided in the directory example/
 Run this example with the command line : `./ProPU -i example/`
 
-# Description of the program
+## Description of the program
 
 This program analyses a pdb file given in entry and extract alpha carbon atoms on the precised chain. It creates a contacts matrix based on distances between atoms with, for each pair of atoms, a probability of contact based on a ligistic probability equation. Then, it cuts the protein into protein units (PUs) and calculates three criteria:
   * partition index (PI)
@@ -56,7 +56,9 @@ The best PU has :
     * a sigma value near 0
     * the highest k value possible 
 
-PUs are cut according to minimum and maximum sizes defined in options. Then, based on a normalization (z-scores) of criteria values and p-value calculation, criteria are defined as significant or not with a threshold of 0.05. It is whether z-scores are negative of positive that defined if a PU can be considered as good. PUs with significantly too high sigma or too low PI and k are left. 
+PUs are cut according to minimum and maximum sizes defined in options. Then, based on a normalization (z-scores) of criteria values and p-value calculation, criteria are defined as significant or not with a threshold of 0.05. It is whether z-scores are negative of positive that defined if a PU can be considered as good. PUs with significantly too high sigma or too low PI and k are left.
+PI values prevail on the selection of significant PUs as it assesses spliting quality quantifying the PUs independence based on contacts probabilities. Sigma and k values provide complementary information but a PU without a significant PI will not be kept, even if sigma or k were significant. 
+To choose best PUs among significant ones, ProPU searches for PUs with all three significant criteria first, then with two, and then with only PI values. Best PUs do not overlap on each other. However, ProPU suggests other PUs that could be interesting to study as it is hard to well defined protein units. 
 
 At the end, two .txt files are created :
 * <chain>_<name>2.txt : which contains all significant PUs
@@ -64,4 +66,4 @@ At the end, two .txt files are created :
   
 Also, as many .png files are created as there are best PUs found by ProPU. Those files show boundaries of PUs on the contacts matrix of the protein. 
 
-#Thanks for using ProPU !
+## Thanks for using ProPU !
