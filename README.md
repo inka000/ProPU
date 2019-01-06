@@ -12,7 +12,7 @@ ProPU is a software that analyses a protein structure and suggests different sub
   * sys
   * re
   * math
-  * numpy : `conda install numpy` ou bien `sudo apt-get install python3-numpy`
+  * numpy : `conda install numpy` or `sudo apt-get install python3-numpy`
   * matplotlib : 
   * statistics
   * scipy
