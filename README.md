@@ -26,6 +26,7 @@ and then to use pip to install packages with the command :
 Once ProPU is downloaded, follow this command to make the program executable :  
   `chmod +x bin/dssp-2.0.4-linux-amd64`  
   `chmod +x ProPU`  
+If the version of DSSP is not suited for your computer, please download the good version [here](https://github.com/cmbi/xssp/releases) and change the path of DSSP in the file ProPU line 61
   
 Now you can run ProPU :  
   `./ProPU -i [PDB_FILES_PATH]`
