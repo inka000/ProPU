@@ -33,12 +33,12 @@ Now you can run ProPU :
 
 Options are available :
 
--h, --help                   Displays help
--i, --input                  Directory where pdb files are or path to a pdb file
---min                        Minimum size for a PU (10 by default)
---max                        Maximum size for a PU (40 by default)
---delta                      Parameter of the logistic probability function (1.5 by default)
---dist                       Distance cut-off for interactions (8.0 by default)
+-h, --help                   Displays help  
+-i, --input                  Directory where pdb files are or path to a pdb file  
+--min                        Minimum size for a PU (10 by default)  
+--max                        Maximum size for a PU (40 by default)  
+--delta                      Parameter of the logistic probability function (1.5 by default)  
+--dist                       Distance cut-off for interactions (8.0 by default)  
 
 An example is provided in the directory example/  
 Run this example with the command line : `./ProPU -i example/`
